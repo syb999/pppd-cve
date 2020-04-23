@@ -1,0 +1,74 @@
+--- a/package/boot/uboot-envtools/files/ramips 
++++ b/package/boot/uboot-envtools/files/ramips 
+@@ -34,7 +34,8 @@ zbtlink,zbt-wg2626)
+ 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x1000" "0x10000"
+ 	;;
+ xiaomi,mir3p|\
+-xiaomi,mir3g)
++xiaomi,mir3g|\
++xiaomi,redmi-router-ac2100)
+ 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x1000" "0x20000"
+ 	;;
+ esac
+--- a/target/linux/ramips/image/mt7621.mk
++++ b/target/linux/ramips/image/mt7621.mk
+@@ -927,6 +927,23 @@ define Device/xiaomi_mir3p
+ endef
+ TARGET_DEVICES += xiaomi_mir3p
+ 
++define Device/xiaomi_redmi-router-ac2100
++  $(Device/uimage-lzma-loader)
++  BLOCKSIZE := 128k
++  PAGESIZE := 2048
++  KERNEL_SIZE := 4096k
++  IMAGE_SIZE := 124416k
++  UBINIZE_OPTS := -E 5
++  IMAGES += kernel1.bin rootfs0.bin
++  IMAGE/kernel1.bin := append-kernel
++  IMAGE/rootfs0.bin := append-ubi | check-size
++  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
++  DEVICE_VENDOR := Xiaomi
++  DEVICE_MODEL := Redmi Router AC2100
++  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e wpad-basic uboot-envtools
++endef
++TARGET_DEVICES += xiaomi_redmi-router-ac2100
++
+ define Device/xiaoyu_xy-c5
+   IMAGE_SIZE := 32448k
+   DEVICE_VENDOR := XiaoYu
+--- a/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
++++ b/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
+@@ -70,6 +70,9 @@ tplink,re650-v1)
+ xzwifi,creativebox-v1)
+ 	ucidef_set_led_netdev "internet" "internet" "$boardname:blue:internet" "wan"
+ 	;;
++xiaomi,redmi-router-ac2100)
++	ucidef_set_led_netdev "wan" "wan" "$boardname:white:wan" "wan"
++	;;
+ youhua,wr1200js)
+ 	ucidef_set_led_netdev "internet" "INTERNET" "$boardname:green:wan" "wan"
+--- a/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
++++ b/target/linux/ramips/mt7621/base-files/etc/board.d/02_network 
+@@ -21,7 +21,8 @@ ramips_setup_interfaces()
+ 		;;
+ 	gehua,ghl-r-001|\
+ 	hiwifi,hc5962|\
+-	xiaomi,mir3p)
++	xiaomi,mir3p|\
++	xiaomi,redmi-router-ac2100)
+ 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "wan"
+ 		;;
+ 	gnubee,gb-pc1|\
+ 	;;
+--- a/target/linux/ramips/mt7621/base-files/lib/upgrade/platform.sh
++++ b/target/linux/ramips/mt7621/base-files/lib/upgrade/platform.sh
+@@ -53,7 +53,8 @@ platform_do_upgrade() {
+ 	netgear,r6850|\
+ 	netis,wf2881|\
+ 	xiaomi,mir3g|\
+-	xiaomi,mir3p)
++	xiaomi,mir3p|\
++	xiaomi,redmi-router-ac2100)
+ 		nand_do_upgrade "$1"
+ 		;;
+ 	iodata,wn-ax1167gr2|\
